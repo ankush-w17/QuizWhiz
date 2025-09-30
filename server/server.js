@@ -18,25 +18,29 @@ app.get('/api/test', (req, res) => {
 // AI quiz generation endpoint
 app.post('/api/generate-quiz', async (req, res) => {
   try {
+    const { topic, numQuestions } = req.body;
+    const quizTopic = topic || 'general knowledge';
+    const questionCount = numQuestions || 5;
+
     const response = await axios.post(
-      'https://models.github.ai/inference/chat/completions',  
+      'https://models.github.ai/inference/chat/completions',
       {
-        model: model,  
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: 'You are a quiz generator. Generate quizzes in valid JSON format only.'
+            content: 'You are a quiz generator. Generate quizzes in valid JSON format only. Return ONLY the JSON, no additional text.'
           },
           {
             role: 'user',
-            content: 'Create a 5-question multiple choice quiz about JavaScript basics. Format: {"questions": [{"question": "...", "options": ["a", "b", "c", "d"], "correctAnswer": "a"}]}'
+            content: `Create a ${questionCount}-question multiple choice quiz about ${quizTopic}. Format: {"questions": [{"question": "...", "options": ["a", "b", "c", "d"], "correctAnswer": "a"}]}`
           }
         ],
         temperature: 0.7
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,  // Your GitHub token
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json'
         }
       }
