@@ -8,7 +8,9 @@ function App() {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const generateQuiz = async () => {
+  const generateQuiz = async (e) => {
+    e.preventDefault(); 
+
     if (!topic.trim()) {
       alert('Please enter a topic');
       return;
@@ -37,8 +39,8 @@ function App() {
     <div className="App">
       <div className="container">
         <h1>QuizWhiz</h1>
-        
-        <div className="input-section">
+ 
+        <form onSubmit={generateQuiz} className="input-section">
           <input
             type="text"
             placeholder="Enter quiz topic (e.g., JavaScript basics, World History)"
@@ -58,10 +60,10 @@ function App() {
             />
           </div>
 
-          <button onClick={generateQuiz} disabled={loading}>
+          <button type="submit" disabled={loading}>
             {loading ? 'Generating...' : 'Generate Quiz'}
           </button>
-        </div>
+        </form>
 
         {quiz && quiz.questions && (
           <div className="quiz-container">
