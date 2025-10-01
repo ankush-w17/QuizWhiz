@@ -36,7 +36,7 @@ function App() {
   return (
     <div className="App">
       <div className="container">
-        <h1>AI Quiz Generator</h1>
+        <h1>QuizWhiz</h1>
         
         <div className="input-section">
           <input
