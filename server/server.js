@@ -122,8 +122,6 @@ app.post('/api/quiz/:code/submit', async (req, res) => {
   try {
     const { studentName, answers } = req.body;
     
-    console.log('=== SUBMISSION DEBUG ===');
-    console.log('Student answers:', answers);
     
     // Find quiz
     const quiz = await Quiz.findOne({ shareableCode: req.params.code });
@@ -131,25 +129,15 @@ app.post('/api/quiz/:code/submit', async (req, res) => {
       return res.status(404).json({ error: 'Quiz not found' });
     }
 
-    console.log('Quiz questions:');
-    quiz.questions.forEach((q, index) => {
-      console.log(`Q${index}: Correct answer = "${q.correctAnswer}"`);
-      console.log(`Q${index}: Student answer = "${answers[index]}"`);
-      console.log(`Q${index}: Match? ${answers[index] === q.correctAnswer}`);
-    });
 
     // Calculate score
     let score = 0;
     quiz.questions.forEach((q, index) => {
       if (answers[index] === q.correctAnswer) {
         score++;
-        console.log(`Q${index}: CORRECT`);
-      } else {
-        console.log(`Q${index}: WRONG`);
-      }
+      } 
     });
 
-    console.log('Final score:', score);
 
     // Save submission
     const submission = new Submission({
