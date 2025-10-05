@@ -383,6 +383,26 @@ app.get('/api/teacher/quizzes', auth, isTeacher, async (req, res) => {
   }
 });
 
+// Get student's submission history
+app.get('/api/student/submissions', auth, async (req, res) => {
+  try {
+    const submissions = await Submission.find({ studentId: req.userId })
+      .populate('quizId', 'topic createdAt')
+      .sort({ submittedAt: -1 });
+
+    res.json(submissions.map(s => ({
+      quizTopic: s.quizId?.topic || 'Deleted Quiz',
+      score: s.score,
+      totalQuestions: s.answers.length,
+      percentage: Math.round((s.score / s.answers.length) * 100),
+      submittedAt: s.submittedAt
+    })));
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to fetch submissions' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

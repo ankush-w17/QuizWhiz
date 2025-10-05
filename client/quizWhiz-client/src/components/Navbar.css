@@ -56,3 +56,15 @@
   border-color: #9268b0;
   transform: translateY(0);
 }
+
+.nav-link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  margin-left: 2rem;
+}
+
+.nav-link:hover {
+  color: #9268b0;
+}

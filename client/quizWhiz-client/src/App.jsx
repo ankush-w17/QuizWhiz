@@ -11,6 +11,8 @@ import QuizGenerator from "./QuizGenerator.jsx";
 import TeacherResults from "./pages/TeacherResults.jsx";
 import Navbar from "./components/Navbar.jsx";
 import TakeQuiz from "./pages/TakeQuiz.jsx";
+import MyQuizzes from "./pages/MyQuizzes.jsx";
+import MyResults from "./pages/MyResults.jsx";
 import "./App.css";
 
 function App() {
@@ -71,6 +73,32 @@ function App() {
               <Navigate to="/login" />
             ) : user.role === "student" ? (
               <TakeQuiz />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/my-quizzes"
+          element={
+            !user ? (
+              <Navigate to="/login" />
+            ) : user.role === "teacher" ? (
+              <MyQuizzes />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+
+        <Route
+          path="/my-results"
+          element={
+            !user ? (
+              <Navigate to="/login" />
+            ) : user.role === "student" ? (
+              <MyResults />
             ) : (
               <Navigate to="/" />
             )

@@ -85,7 +85,7 @@ function QuizGenerator() {
   };
 
   const copyShareableLink = () => {
-    const link = `http://localhost:3000/quiz/${shareableCode}`;
+    const link = `http://localhost:5173/quiz/${shareableCode}`;
     navigator.clipboard.writeText(link);
     alert("Link copied to clipboard!");
   };
@@ -131,7 +131,7 @@ function QuizGenerator() {
                   <div className="link-copy">
                     <input
                       type="text"
-                      value={`http://localhost:3000/quiz/${shareableCode}`}
+                      value={`http://localhost:5173/quiz/${shareableCode}`}
                       readOnly
                     />
                     <button
