@@ -2,8 +2,13 @@ const mongoose = require('mongoose');
 
 const submissionSchema = new mongoose.Schema({
   quizId: {
-    type: mongoose.Schema.Types.ObjectId,  // References Quiz._id
-    ref: 'Quiz',  // Links to Quiz model
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Quiz',
+    required: true
+  },
+  studentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   studentName: {
@@ -18,7 +23,7 @@ const submissionSchema = new mongoose.Schema({
   score: {
     type: Number,
     required: true,
-    min: 0  // Can't be negative
+    min: 0
   },
   submittedAt: {
     type: Date,

@@ -101,7 +101,8 @@ app.post('/api/generate-quiz', auth, isTeacher, async (req, res) => {
 });
 
 // Get quiz by shareable code (for students)
-app.get('/api/quiz/:code', async (req, res) => {
+// Get quiz by shareable code (for students)
+app.get('/api/quiz/:code', auth, async (req, res) => {
   try {
     const quiz = await Quiz.findOne({ shareableCode: req.params.code });
     
@@ -109,14 +110,26 @@ app.get('/api/quiz/:code', async (req, res) => {
       return res.status(404).json({ error: 'Quiz not found' });
     }
 
-    // Don't send correct answers to students
+    // Check if student already submitted
+    const existingSubmission = await Submission.findOne({
+      quizId: quiz._id,
+      studentId: req.userId
+    });
+
+    if (existingSubmission) {
+      return res.status(400).json({ 
+        error: 'You have already submitted this quiz',
+        alreadySubmitted: true
+      });
+    }
+
+    // Don't send correct answers
     const quizForStudent = {
       quizId: quiz._id,
       topic: quiz.topic,
       questions: quiz.questions.map(q => ({
         question: q.question,
         options: q.options
-        // correctAnswer intentionally omitted
       }))
     };
 
@@ -129,31 +142,44 @@ app.get('/api/quiz/:code', async (req, res) => {
 
 // Submit quiz answers
 // Submit quiz answers
-app.post('/api/quiz/:code/submit', async (req, res) => {
+// Submit quiz answers (students)
+app.post('/api/quiz/:code/submit', auth, async (req, res) => {
   try {
-    const { studentName, answers } = req.body;
+    const { answers } = req.body;
     
-    
-    // Find quiz
     const quiz = await Quiz.findOne({ shareableCode: req.params.code });
     if (!quiz) {
       return res.status(404).json({ error: 'Quiz not found' });
     }
 
+    // Check if student already submitted
+    if (req.user.role === 'student') {
+      const existingSubmission = await Submission.findOne({
+        quizId: quiz._id,
+        studentId: req.userId
+      });
+
+      if (existingSubmission) {
+        return res.status(400).json({ 
+          error: 'You have already submitted this quiz',
+          alreadySubmitted: true 
+        });
+      }
+    }
 
     // Calculate score
     let score = 0;
     quiz.questions.forEach((q, index) => {
       if (answers[index] === q.correctAnswer) {
         score++;
-      } 
+      }
     });
-
 
     // Save submission
     const submission = new Submission({
       quizId: quiz._id,
-      studentName: studentName,
+      studentId: req.userId,
+      studentName: req.user.name,
       answers: answers,
       score: score
     });
@@ -173,15 +199,21 @@ app.post('/api/quiz/:code/submit', async (req, res) => {
 });
 
 // Get all submissions for a quiz (for teacher)
-app.get('/api/quiz/:code/results', async (req, res) => {
+// Get all submissions for a quiz (for teacher who created it)
+app.get('/api/quiz/:code/results', auth, isTeacher, async (req, res) => {
   try {
     const quiz = await Quiz.findOne({ shareableCode: req.params.code });
     if (!quiz) {
       return res.status(404).json({ error: 'Quiz not found' });
     }
 
+    // Check if this teacher owns the quiz
+    if (quiz.teacherId.toString() !== req.userId.toString()) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const submissions = await Submission.find({ quizId: quiz._id })
-      .sort({ submittedAt: -1 });  // Newest first
+      .sort({ submittedAt: -1 });
 
     res.json({
       topic: quiz.topic,
@@ -334,6 +366,20 @@ app.get('/api/auth/me', async (req, res) => {
     });
   } catch (error) {
     res.status(401).json({ error: 'Not authenticated' });
+  }
+});
+
+// Get all quizzes created by the logged-in teacher
+app.get('/api/teacher/quizzes', auth, isTeacher, async (req, res) => {
+  try {
+    const quizzes = await Quiz.find({ teacherId: req.userId })
+      .sort({ createdAt: -1 })
+      .select('topic shareableCode createdAt');
+
+    res.json(quizzes);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to fetch quizzes' });
   }
 });
 

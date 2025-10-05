@@ -329,3 +329,37 @@ button:disabled {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(146, 104, 176, 0.4);
 }
+
+.view-results-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: #9268b0;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.view-results-link:hover {
+  color: #7c53a0;
+}
+
+.view-results-link {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 15px;
+  background: #2b3c56;
+  color: #9268b0;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #475569;
+  transition: all 0.2s;
+}
+
+.view-results-link:hover {
+  background: #334155;
+  border-color: #9268b0;
+  transform: translateY(-2px);
+} 
