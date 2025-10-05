@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import Navbar from './components/Navbar.jsx';
 import './App.css';
 
 function QuizGenerator() {
@@ -86,6 +87,8 @@ function QuizGenerator() {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="App">
       <div className="container">
         <h1>QuizWhiz</h1>
@@ -192,6 +195,7 @@ function QuizGenerator() {
         )}
       </div>
     </div>
+    </>
   );
 }
 
