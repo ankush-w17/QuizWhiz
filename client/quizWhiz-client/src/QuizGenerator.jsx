@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 import Navbar from './components/Navbar.jsx';
 import './App.css';
 

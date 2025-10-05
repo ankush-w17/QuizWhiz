@@ -1,3 +1,4 @@
+const { auth, isTeacher } = require('./middleware/auth.jsx');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -32,7 +33,8 @@ app.get('/api/test', (req, res) => {
 });
 
 // Generate quiz and SAVE to database
-app.post('/api/generate-quiz', async (req, res) => {
+// Generate quiz and SAVE to database (PROTECTED - Teachers only)
+app.post('/api/generate-quiz', auth, isTeacher, async (req, res) => {
   try {
     const { topic, numQuestions } = req.body;
     const quizTopic = topic || 'general knowledge';
@@ -71,17 +73,18 @@ app.post('/api/generate-quiz', async (req, res) => {
     while (!isUnique) {
       shareableCode = generateShareableCode();
       const existing = await Quiz.findOne({ shareableCode });
-      if (!existing) isUnique = true;  // Code is unique
+      if (!existing) isUnique = true;
     }
 
-    // Save to database
+    // Save to database WITH teacherId
     const newQuiz = new Quiz({
+      teacherId: req.userId,  // From auth middleware
       topic: quizTopic,
       questions: quizData.questions,
       shareableCode: shareableCode
     });
 
-    await newQuiz.save();  // Saves to MongoDB
+    await newQuiz.save();
 
     // Return quiz with shareable code
     res.json({

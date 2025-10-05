@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
 
-
 const quizSchema = new mongoose.Schema({
+  teacherId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true  // Now required
+  },
   topic: {
     type: String,
     required: true,
-    trim: true  
+    trim: true
   },
   questions: [{
     question: {
@@ -17,7 +21,7 @@ const quizSchema = new mongoose.Schema({
       required: true,
       validate: {
         validator: function(arr) {
-          return arr.length === 4;  
+          return arr.length === 4;
         },
         message: 'Each question must have exactly 4 options'
       }
@@ -30,13 +34,12 @@ const quizSchema = new mongoose.Schema({
   shareableCode: {
     type: String,
     required: true,
-    unique: true  
+    unique: true
   },
   createdAt: {
     type: Date,
-    default: Date.now  
+    default: Date.now
   }
 });
-
 
 module.exports = mongoose.model('Quiz', quizSchema);
