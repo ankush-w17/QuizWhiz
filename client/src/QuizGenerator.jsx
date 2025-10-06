@@ -149,7 +149,7 @@ function QuizGenerator() {
                   <div className="link-copy">
                     <input 
                       type="text" 
-                      value={`http://localhost:5173/quiz/${shareableCode}`}
+                      value={`${window.location.origin}/quiz/${shareableCode}`}
                       readOnly
                     />
                     <button onClick={copyShareableLink} className="copy-btn" type="button">
