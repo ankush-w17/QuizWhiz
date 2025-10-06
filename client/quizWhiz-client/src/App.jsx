@@ -42,11 +42,34 @@ function App() {
             ) : (
               <>
                 <Navbar />
-                <div style={{ padding: "2rem", textAlign: "center" }}>
-                  <h1 style={{ color: "white" }}>Student Dashboard</h1>
-                  <p style={{ color: "#94a3b8" }}>
-                    Student quiz-taking feature coming soon...
-                  </p>
+                <div className="App">
+                  <div className="container" style={{ textAlign: "center" }}>
+                    <h1 style={{ color: "white", marginBottom: "1.5rem" }}>
+                      Welcome, {user.name}!
+                    </h1>
+                    <div
+                      style={{
+                        background: "#334155",
+                        padding: "2rem",
+                        borderRadius: "12px",
+                      }}
+                    >
+                      <p
+                        style={{
+                          color: "#cbd5e1",
+                          fontSize: "1.1rem",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        To take a quiz, ask your teacher for the quiz link or
+                        code.
+                      </p>
+                      <p style={{ color: "#94a3b8", fontSize: "0.95rem" }}>
+                        Click "My Results" in the navigation to view your quiz
+                        history.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </>
             )

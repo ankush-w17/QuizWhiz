@@ -19,15 +19,15 @@ function Navbar() {
           <Link to="/">
             <img src="/QuizWhiz_logo.png" alt="QuizWhiz" className="logo" />
           </Link>
+        </div>
+        
+        <div className="navbar-right">
           {user.role === 'teacher' && (
             <Link to="/my-quizzes" className="nav-link">My Quizzes</Link>
           )}
           {user.role === 'student' && (
             <Link to="/my-results" className="nav-link">My Results</Link>
           )}
-        </div>
-        
-        <div className="navbar-right">
           <span className="user-info">
             {user.name} ({user.role})
           </span>
