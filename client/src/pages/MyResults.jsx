@@ -3,6 +3,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar.jsx";
 import "./MyResults.css";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function MyResults() {
   const [submissions, setSubmissions] = useState([]);
@@ -15,7 +16,7 @@ function MyResults() {
   const fetchSubmissions = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/student/submissions"
+        `${API_URL}/api/student/submissions`
       );
       setSubmissions(response.data);
     } catch (error) {

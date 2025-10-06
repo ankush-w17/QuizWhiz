@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar.jsx";
 import "./TeacherResults.css";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function TeacherResults() {
   const { code } = useParams();
@@ -18,7 +19,7 @@ function TeacherResults() {
   const fetchResults = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/quiz/${code}/results`
+        `${API_URL}/api/quiz/${code}/results`
       );
       setResults(response.data);
     } catch (err) {

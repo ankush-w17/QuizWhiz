@@ -3,6 +3,7 @@ import axios from 'axios';
 import Navbar from './components/Navbar.jsx';
 import ErrorMessage from './components/ErrorMessage.jsx';
 import './App.css';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function QuizGenerator() {
   const [topic, setTopic] = useState('');
@@ -35,7 +36,7 @@ function QuizGenerator() {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/generate-quiz', {
+      const response = await axios.post(`${API_URL}/api/generate-quiz`, {
         topic: topic,
         numQuestions: numQuestions
       });
@@ -81,7 +82,7 @@ function QuizGenerator() {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/quiz/${shareableCode}/submit`,
+        `${API_URL}/api/quiz/${shareableCode}/submit`,
         {
           answers: answersArray
         }
@@ -97,7 +98,7 @@ function QuizGenerator() {
   };
 
   const copyShareableLink = () => {
-    const link = `http://localhost:5173/quiz/${shareableCode}`;
+    const link = `${window.location.origin}/quiz/${shareableCode}`;
     navigator.clipboard.writeText(link);
     alert('Link copied to clipboard!');
   };

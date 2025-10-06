@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar.jsx";
 import "../App.css";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function TakeQuiz() {
   const { code } = useParams();
@@ -21,7 +22,7 @@ function TakeQuiz() {
   const fetchQuiz = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/quiz/${code}`
+        `${API_URL}/api/quiz/${code}`
       );
       setQuiz(response.data);
     } catch (err) {
@@ -56,7 +57,7 @@ function TakeQuiz() {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/quiz/${code}/submit`,
+        `${API_URL}/api/quiz/${code}/submit`,
         {
           answers: answersArray,
         }

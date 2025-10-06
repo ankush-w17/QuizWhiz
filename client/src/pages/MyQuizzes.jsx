@@ -4,6 +4,7 @@ import axios from "axios";
 import Navbar from "../components/Navbar.jsx";
 import "./MyQuizzes.css";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function MyQuizzes() {
   const [quizzes, setQuizzes] = useState([]);
@@ -16,7 +17,7 @@ function MyQuizzes() {
   const fetchQuizzes = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/teacher/quizzes"
+        `${API_URL}/api/teacher/quizzes`
       );
       setQuizzes(response.data);
     } catch (error) {
@@ -27,7 +28,7 @@ function MyQuizzes() {
   };
 
   const copyLink = (code) => {
-    const link = `http://localhost:5173/quiz/${code}`;
+    const link = `${window.location.origin}/quiz/${code}`;
     navigator.clipboard.writeText(link);
     alert("Link copied to clipboard!");
   };
