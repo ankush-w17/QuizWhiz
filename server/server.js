@@ -13,7 +13,9 @@ const Submission = require('./models/Submission');  // Import Submission model
 
 const app = express();
 app.use(cors({
-  origin: true,
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://quiz-whiz-sandy.vercel.app/'] 
+    : 'http://localhost:5173',
   credentials: true
 }));
 app.use(cookieParser());
