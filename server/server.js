@@ -370,13 +370,28 @@ app.get('/api/auth/me', async (req, res) => {
 });
 
 // Get all quizzes created by the logged-in teacher
+// Get all quizzes created by the logged-in teacher WITH submission counts
 app.get('/api/teacher/quizzes', auth, isTeacher, async (req, res) => {
   try {
     const quizzes = await Quiz.find({ teacherId: req.userId })
       .sort({ createdAt: -1 })
       .select('topic shareableCode createdAt');
 
-    res.json(quizzes);
+    // Get submission counts for each quiz
+    const quizzesWithCounts = await Promise.all(
+      quizzes.map(async (quiz) => {
+        const submissionCount = await Submission.countDocuments({ quizId: quiz._id });
+        return {
+          _id: quiz._id,
+          topic: quiz.topic,
+          shareableCode: quiz.shareableCode,
+          createdAt: quiz.createdAt,
+          submissionCount: submissionCount
+        };
+      })
+    );
+
+    res.json(quizzesWithCounts);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to fetch quizzes' });

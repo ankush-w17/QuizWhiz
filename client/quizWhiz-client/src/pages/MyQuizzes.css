@@ -94,3 +94,10 @@
 .action-btn.results:hover {
   background: #7c53a0;
 }
+
+.submission-count {
+  color: #9268b0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}

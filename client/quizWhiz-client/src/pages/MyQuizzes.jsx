@@ -52,6 +52,9 @@ function MyQuizzes() {
                     Created: {new Date(quiz.createdAt).toLocaleDateString()}
                   </p>
                   <p className="quiz-code">Code: {quiz.shareableCode}</p>
+                  <p className="submission-count">
+                    {quiz.submissionCount} {quiz.submissionCount === 1 ? 'submission' : 'submissions'}
+                  </p>
                   <div className="quiz-actions">
                     <button 
                       onClick={() => copyLink(quiz.shareableCode)}
