@@ -38,7 +38,8 @@ function QuizGenerator() {
     try {
       const response = await axios.post(`${API_URL}/api/generate-quiz`, {
         topic: topic,
-        numQuestions: numQuestions
+        numQuestions: numQuestions,
+        withCredentials: true
       });
       setQuiz(response.data);
       setShareableCode(response.data.shareableCode);
