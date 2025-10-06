@@ -344,7 +344,12 @@ app.post("/api/auth/login", async (req, res) => {
 
 // Logout
 app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("token");
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // must match creation
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 0,
+  });
   res.json({ message: "Logged out successfully" });
 });
 
