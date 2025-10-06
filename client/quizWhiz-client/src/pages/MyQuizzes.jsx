@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import Navbar from '../components/Navbar.jsx';
-import './MyQuizzes.css';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import Navbar from "../components/Navbar.jsx";
+import "./MyQuizzes.css";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 function MyQuizzes() {
   const [quizzes, setQuizzes] = useState([]);
@@ -14,10 +15,12 @@ function MyQuizzes() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/teacher/quizzes');
+      const response = await axios.get(
+        "http://localhost:5000/api/teacher/quizzes"
+      );
       setQuizzes(response.data);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -26,7 +29,7 @@ function MyQuizzes() {
   const copyLink = (code) => {
     const link = `http://localhost:5173/quiz/${code}`;
     navigator.clipboard.writeText(link);
-    alert('Link copied to clipboard!');
+    alert("Link copied to clipboard!");
   };
 
   return (
@@ -37,11 +40,13 @@ function MyQuizzes() {
           <h1>My Quizzes</h1>
 
           {loading ? (
-            <p style={{ color: 'white' }}>Loading...</p>
+            <LoadingSpinner message="Loading your quizzes..." />
           ) : quizzes.length === 0 ? (
             <div className="no-quizzes">
               <p>You haven't created any quizzes yet</p>
-              <Link to="/" className="create-quiz-btn">Create Your First Quiz</Link>
+              <Link to="/" className="create-quiz-btn">
+                Create Your First Quiz
+              </Link>
             </div>
           ) : (
             <div className="quizzes-grid">
@@ -53,16 +58,17 @@ function MyQuizzes() {
                   </p>
                   <p className="quiz-code">Code: {quiz.shareableCode}</p>
                   <p className="submission-count">
-                    {quiz.submissionCount} {quiz.submissionCount === 1 ? 'submission' : 'submissions'}
+                    {quiz.submissionCount}{" "}
+                    {quiz.submissionCount === 1 ? "submission" : "submissions"}
                   </p>
                   <div className="quiz-actions">
-                    <button 
+                    <button
                       onClick={() => copyLink(quiz.shareableCode)}
                       className="action-btn copy"
                     >
                       Copy Link
                     </button>
-                    <Link 
+                    <Link
                       to={`/results/${quiz.shareableCode}`}
                       className="action-btn results"
                     >

@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import Navbar from '../components/Navbar.jsx';
-import '../App.css';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import Navbar from "../components/Navbar.jsx";
+import "../App.css";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 function TakeQuiz() {
   const { code } = useParams();
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
@@ -19,13 +20,15 @@ function TakeQuiz() {
 
   const fetchQuiz = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/quiz/${code}`);
+      const response = await axios.get(
+        `http://localhost:5000/api/quiz/${code}`
+      );
       setQuiz(response.data);
     } catch (err) {
       if (err.response?.data?.alreadySubmitted) {
-        setError('You have already submitted this quiz');
+        setError("You have already submitted this quiz");
       } else {
-        setError(err.response?.data?.error || 'Quiz not found');
+        setError(err.response?.data?.error || "Quiz not found");
       }
     } finally {
       setLoading(false);
@@ -35,14 +38,14 @@ function TakeQuiz() {
   const handleAnswerSelect = (questionIndex, optionIndex) => {
     setSelectedAnswers({
       ...selectedAnswers,
-      [questionIndex]: optionIndex
+      [questionIndex]: optionIndex,
     });
   };
 
   const handleSubmit = async () => {
     const answersArray = [];
-    const letters = ['a', 'b', 'c', 'd'];
-    
+    const letters = ["a", "b", "c", "d"];
+
     for (let i = 0; i < quiz.questions.length; i++) {
       if (selectedAnswers[i] === undefined) {
         alert(`Please answer question ${i + 1}`);
@@ -55,14 +58,14 @@ function TakeQuiz() {
       const response = await axios.post(
         `http://localhost:5000/api/quiz/${code}/submit`,
         {
-          answers: answersArray
+          answers: answersArray,
         }
       );
       setResult(response.data);
       setSubmitted(true);
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to submit quiz');
+      console.error("Error:", error);
+      alert("Failed to submit quiz");
     }
   };
 
@@ -72,7 +75,7 @@ function TakeQuiz() {
         <Navbar />
         <div className="App">
           <div className="container">
-            <p style={{ color: 'white' }}>Loading quiz...</p>
+            <LoadingSpinner message="Loading quiz..." />
           </div>
         </div>
       </>
@@ -85,7 +88,9 @@ function TakeQuiz() {
         <Navbar />
         <div className="App">
           <div className="container">
-            <div className="error-message" style={{ marginTop: '2rem' }}>{error}</div>
+            <div className="error-message" style={{ marginTop: "2rem" }}>
+              {error}
+            </div>
           </div>
         </div>
       </>
@@ -103,13 +108,17 @@ function TakeQuiz() {
               <div className="score-display">
                 <div className="score-circle">
                   <span className="percentage">{result.percentage}%</span>
-                  <span className="score-text">{result.score} / {result.total}</span>
+                  <span className="score-text">
+                    {result.score} / {result.total}
+                  </span>
                 </div>
               </div>
               <p className="result-message">
-                {result.percentage >= 80 ? 'Excellent work!' : 
-                 result.percentage >= 60 ? 'Good job!' : 
-                 'Keep practicing!'}
+                {result.percentage >= 80
+                  ? "Excellent work!"
+                  : result.percentage >= 60
+                  ? "Good job!"
+                  : "Keep practicing!"}
               </p>
             </div>
           </div>
@@ -124,7 +133,7 @@ function TakeQuiz() {
       <div className="App">
         <div className="container">
           <h1>Take Quiz: {quiz.topic}</h1>
-          
+
           <div className="quiz-container">
             {quiz.questions.map((q, index) => (
               <div key={index} className="question-card">
@@ -132,19 +141,23 @@ function TakeQuiz() {
                 <p className="question-text">{q.question}</p>
                 <div className="options">
                   {q.options.map((option, optIndex) => (
-                    <div 
-                      key={optIndex} 
-                      className={`option ${selectedAnswers[index] === optIndex ? 'selected' : ''}`}
+                    <div
+                      key={optIndex}
+                      className={`option ${
+                        selectedAnswers[index] === optIndex ? "selected" : ""
+                      }`}
                       onClick={() => handleAnswerSelect(index, optIndex)}
                     >
-                      <input 
-                        type="radio" 
-                        name={`question-${index}`} 
+                      <input
+                        type="radio"
+                        name={`question-${index}`}
                         id={`q${index}-opt${optIndex}`}
                         checked={selectedAnswers[index] === optIndex}
                         onChange={() => handleAnswerSelect(index, optIndex)}
                       />
-                      <label htmlFor={`q${index}-opt${optIndex}`}>{option}</label>
+                      <label htmlFor={`q${index}-opt${optIndex}`}>
+                        {option}
+                      </label>
                     </div>
                   ))}
                 </div>

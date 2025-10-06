@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import Navbar from '../components/Navbar.jsx';
-import './TeacherResults.css';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import Navbar from "../components/Navbar.jsx";
+import "./TeacherResults.css";
+import LoadingSpinner from "../components/LoadingSpinner.jsx";
 
 function TeacherResults() {
   const { code } = useParams();
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchResults();
@@ -16,10 +17,12 @@ function TeacherResults() {
 
   const fetchResults = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/quiz/${code}/results`);
+      const response = await axios.get(
+        `http://localhost:5000/api/quiz/${code}/results`
+      );
       setResults(response.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch results');
+      setError(err.response?.data?.error || "Failed to fetch results");
     } finally {
       setLoading(false);
     }
@@ -31,7 +34,7 @@ function TeacherResults() {
         <Navbar />
         <div className="results-page">
           <div className="container">
-            <p style={{ color: 'white' }}>Loading...</p>
+            <LoadingSpinner message="Loading results..." />
           </div>
         </div>
       </>
@@ -57,7 +60,7 @@ function TeacherResults() {
       <div className="results-page">
         <div className="container">
           <h1>Quiz Results: {results.topic}</h1>
-          
+
           <div className="stats-card">
             <div className="stat">
               <span className="stat-label">Total Submissions</span>
@@ -72,9 +75,12 @@ function TeacherResults() {
                 <span className="stat-label">Average Score</span>
                 <span className="stat-value">
                   {Math.round(
-                    results.submissions.reduce((sum, s) => sum + s.percentage, 0) / 
-                    results.submissions.length
-                  )}%
+                    results.submissions.reduce(
+                      (sum, s) => sum + s.percentage,
+                      0
+                    ) / results.submissions.length
+                  )}
+                  %
                 </span>
               </div>
             )}
@@ -99,16 +105,25 @@ function TeacherResults() {
                   {results.submissions.map((submission, index) => (
                     <tr key={index}>
                       <td>{submission.studentName}</td>
-                      <td>{submission.score} / {results.totalQuestions}</td>
                       <td>
-                        <span className={`percentage-badge ${
-                          submission.percentage >= 80 ? 'excellent' :
-                          submission.percentage >= 60 ? 'good' : 'needs-improvement'
-                        }`}>
+                        {submission.score} / {results.totalQuestions}
+                      </td>
+                      <td>
+                        <span
+                          className={`percentage-badge ${
+                            submission.percentage >= 80
+                              ? "excellent"
+                              : submission.percentage >= 60
+                              ? "good"
+                              : "needs-improvement"
+                          }`}
+                        >
                           {submission.percentage}%
                         </span>
                       </td>
-                      <td>{new Date(submission.submittedAt).toLocaleString()}</td>
+                      <td>
+                        {new Date(submission.submittedAt).toLocaleString()}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
