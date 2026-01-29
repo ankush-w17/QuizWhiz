@@ -1,122 +1,99 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
-import QuizGenerator from './QuizGenerator.jsx';
-import TeacherResults from './pages/TeacherResults.jsx';
-import MyQuizzes from './pages/MyQuizzes.jsx';
-import MyResults from './pages/MyResults.jsx';
-import TakeQuiz from './pages/TakeQuiz.jsx';
-import Navbar from './components/Navbar.jsx';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import QuizGenerator from "./QuizGenerator";
+import QuizTaking from "./pages/QuizTaking";
+import QuizResults from "./pages/QuizResults";
+import AuthSuccess from "./pages/AuthSuccess"; // New page for OAuth redirect
+import "./App.css";
 
-function StudentDashboard() {
-  const { user } = useAuth();
-  const [quizCode, setQuizCode] = useState('');
-  const navigate = useNavigate();
+const NavBar = () => {
+  const { user, logout } = useAuth();
+  const location = useLocation();
 
-  const handleStartQuiz = (e) => {
-    e.preventDefault();
-    if (quizCode.trim()) {
-      navigate(`/quiz/${quizCode.trim()}`);
-    } else {
-      alert('Please enter a quiz code');
-    }
-  };
+  if (["/login", "/register"].includes(location.pathname)) return null;
 
   return (
-    <>
-      <Navbar />
-      <div className="App">
-        <div className="container">
-          <h1>Welcome, {user.name}!</h1>
-          
-          <form onSubmit={handleStartQuiz} className="input-section" style={{ marginTop: '2rem' }}>
-            <h2 style={{ color: 'white', marginBottom: '1rem', fontSize: '1.3rem' }}>Enter Quiz Code</h2>
-            <input
-              type="text"
-              placeholder="Enter the quiz code from your teacher"
-              value={quizCode}
-              onChange={(e) => setQuizCode(e.target.value)}
-              style={{ marginBottom: '1rem' }}
-            />
-            <button type="submit">
-              Start Quiz
+    <nav className="navbar container">
+      <Link to="/" className="logo text-gradient">
+        Quantum Quiz
+      </Link>
+      <div className="nav-links">
+        {user ? (
+          <>
+            <Link to="/" className="nav-item">Dashboard</Link>
+            {user.role === "teacher" && (
+              <Link to="/create-quiz" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>
+                + Create
+              </Link>
+            )}
+            <button onClick={logout} className="nav-item" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>
+              Logout
             </button>
-          </form>
-
-          <div style={{ background: '#334155', padding: '1.5rem', borderRadius: '12px', marginTop: '2rem' }}>
-            <p style={{ color: '#cbd5e1', textAlign: 'center', margin: 0 }}>
-              Click "My Results" in the navigation to view your quiz history
-            </p>
-          </div>
-        </div>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="nav-item">Login</Link>
+            <Link to="/register" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>Get Started</Link>
+          </>
+        )}
       </div>
-    </>
+    </nav>
   );
-}
+};
 
-function App() {
+const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return <div style={{ color: 'white', padding: '2rem' }}>Loading...</div>;
-  }
+  if (loading) return <div className="container" style={{padding: '2rem'}}>Loading...</div>;
+  if (!user) return <Login />;
+  if (role && user.role !== role) return <div className="container">Access Denied</div>;
 
+  return children;
+};
+
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-        
-        <Route 
-          path="/" 
-          element={
-            !user ? <Navigate to="/login" /> :
-            user.role === 'teacher' ? <QuizGenerator /> :
-            <StudentDashboard />
-          } 
-        />
-        
-        <Route 
-          path="/my-quizzes" 
-          element={
-            !user ? <Navigate to="/login" /> :
-            user.role === 'teacher' ? <MyQuizzes /> : 
-            <Navigate to="/" />
-          } 
-        />
-
-        <Route 
-          path="/my-results" 
-          element={
-            !user ? <Navigate to="/login" /> :
-            user.role === 'student' ? <MyResults /> : 
-            <Navigate to="/" />
-          } 
-        />
-        
-        <Route 
-          path="/results/:code" 
-          element={
-            !user ? <Navigate to="/login" /> :
-            user.role === 'teacher' ? <TeacherResults /> : 
-            <Navigate to="/" />
-          } 
-        />
-
-        <Route 
-          path="/quiz/:code" 
-          element={
-            !user ? <Navigate to="/login" /> :
-            user.role === 'student' ? <TakeQuiz /> : 
-            <Navigate to="/" />
-          } 
-        />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="app-layout">
+          <NavBar />
+          <div className="container" style={{ flex: 1, paddingBottom: '2rem' }}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/auth-success" element={<AuthSuccess />} />
+              
+              <Route path="/" element={
+                 <ProtectedRoute>
+                   <Dashboard />
+                 </ProtectedRoute>
+              } />
+              
+              <Route path="/create-quiz" element={
+                <ProtectedRoute role="teacher">
+                  <QuizGenerator />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/quiz/:code" element={
+                <ProtectedRoute>
+                  <QuizTaking />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/quiz/:code/results" element={
+                <ProtectedRoute role="teacher">
+                  <QuizResults />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </div>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

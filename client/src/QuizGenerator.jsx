@@ -1,20 +1,18 @@
 import { useState } from 'react';
 import axios from 'axios';
-import Navbar from './components/Navbar.jsx';
-import ErrorMessage from './components/ErrorMessage.jsx';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function QuizGenerator() {
   const [topic, setTopic] = useState('');
   const [numQuestions, setNumQuestions] = useState(5);
-  const [quiz, setQuiz] = useState(null);
+  const [difficulty, setDifficulty] = useState('medium');
   const [loading, setLoading] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [result, setResult] = useState(null);
-  const [shareableCode, setShareableCode] = useState('');
+  const [quiz, setQuiz] = useState(null);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const generateQuiz = async (e) => {
     e.preventDefault();
@@ -24,203 +22,122 @@ function QuizGenerator() {
       return;
     }
 
-    if (numQuestions < 1 || numQuestions > 20) {
-      setError('Please enter between 1 and 20 questions');
-      return;
-    }
-
     setLoading(true);
-    setSubmitted(false);
-    setResult(null);
-    setSelectedAnswers({});
+    setQuiz(null);
     setError('');
 
     try {
       const response = await axios.post(`${API_URL}/api/generate-quiz`, {
         topic: topic,
         numQuestions: numQuestions,
+        difficulty: difficulty
+      }, {
         withCredentials: true
       });
+      
       setQuiz(response.data);
-      setShareableCode(response.data.shareableCode);
     } catch (error) {
       console.error('Error:', error);
-      if (error.code === 'ERR_NETWORK') {
-        setError('Network error. Please check your internet connection and try again.');
-      } else if (error.response?.status === 401) {
-        setError('Session expired. Please log in again.');
-      } else if (error.response?.status === 500) {
-        setError('Server error. Please try again in a moment.');
-      } else {
-        setError(error.response?.data?.error || 'Failed to generate quiz. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAnswerSelect = (questionIndex, optionIndex) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [questionIndex]: optionIndex
-    });
-  };
-
-  const handleSubmit = async () => {
-    const answersArray = [];
-    const letters = ['a', 'b', 'c', 'd'];
-    
-    for (let i = 0; i < quiz.questions.length; i++) {
-      if (selectedAnswers[i] === undefined) {
-        setError(`Please answer question ${i + 1}`);
-        return;
-      }
-      answersArray.push(letters[selectedAnswers[i]]);
-    }
-
-    setError('');
-    setLoading(true);
-
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/quiz/${shareableCode}/submit`,
-        {
-          answers: answersArray
-        }
-      );
-      setResult(response.data);
-      setSubmitted(true);
-    } catch (error) {
-      console.error('Error:', error);
-      setError('Failed to submit quiz. Please try again.');
+      setError(error.response?.data?.error || 'Failed to generate quiz');
     } finally {
       setLoading(false);
     }
   };
 
   const copyShareableLink = () => {
-    const link = `${window.location.origin}/quiz/${shareableCode}`;
+    const link = `${window.location.origin}/quiz/${quiz.shareableCode}`;
     navigator.clipboard.writeText(link);
     alert('Link copied to clipboard!');
   };
 
-  const clearError = () => setError('');
-
   return (
-    <>
-      <Navbar />
-      <div className="App">
-        <div className="container">
-          <h1>QuizWhiz</h1>
-          
-          {error && <ErrorMessage message={error} onRetry={clearError} />}
-          
-          <form onSubmit={generateQuiz} className="input-section">
-            <input
-              type="text"
-              placeholder="Enter quiz topic (e.g., JavaScript basics, World History)"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-            />
-            
-            <div className="number-input-group">
-              <label htmlFor="numQuestions">Number of Questions:</label>
+    <div className="generator-container">
+      <h1 className="page-title text-gradient">Create New Quiz</h1>
+      <p className="page-subtitle" style={{marginBottom: '2rem'}}>Use AI to generate a custom quiz in seconds.</p>
+      
+      {error && <div className="card" style={{borderColor: '#ef4444', color: '#ef4444', marginBottom: '1rem'}}>{error}</div>}
+      
+      {!quiz ? (
+        <div className="card">
+          <form onSubmit={generateQuiz}>
+            <div className="form-group">
+              <label className="form-label">Topic</label>
               <input
-                type="number"
-                id="numQuestions"
-                min="1"
-                max="20"
-                value={numQuestions}
-                onChange={(e) => setNumQuestions(parseInt(e.target.value) || 5)}
+                type="text"
+                className="form-input"
+                placeholder="e.g., Quantum Physics, Ancient Rome, Python Basics"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
               />
             </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Difficulty</label>
+                <select 
+                  className="form-input" 
+                  value={difficulty} 
+                  onChange={(e) => setDifficulty(e.target.value)}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Generating...' : 'Generate Quiz'}
+              <div className="form-group">
+                <label className="form-label">Questions</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  min="1"
+                  max="20"
+                  value={numQuestions}
+                  onChange={(e) => setNumQuestions(parseInt(e.target.value) || 5)}
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-primary" style={{width: '100%'}} disabled={loading}>
+              {loading ? (
+                 <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
+                   <span className="spinner"></span> Generating...
+                 </span>
+              ) : 'Generate Quiz'}
             </button>
           </form>
-
-          {quiz && !submitted && (
-            <div className="quiz-container">
-              <div className="quiz-header">
-                <h2>Generated Quiz: {quiz.topic}</h2>
-                <div className="shareable-section">
-                  <p>Share this link with students:</p>
-                  <div className="link-copy">
-                    <input 
-                      type="text" 
-                      value={`${window.location.origin}/quiz/${shareableCode}`}
-                      readOnly
-                    />
-                    <button onClick={copyShareableLink} className="copy-btn" type="button">
-                      Copy Link
-                    </button>
-                  </div>
-                  <a href={`/results/${shareableCode}`} className="view-results-link">
-                    View Results
-                  </a>
-                </div>
-              </div>
-
-              {quiz.questions.map((q, index) => (
-                <div key={index} className="question-card">
-                  <h3>Question {index + 1}</h3>
-                  <p className="question-text">{q.question}</p>
-                  <div className="options">
-                    {q.options.map((option, optIndex) => (
-                      <div 
-                        key={optIndex} 
-                        className={`option ${selectedAnswers[index] === optIndex ? 'selected' : ''}`}
-                        onClick={() => handleAnswerSelect(index, optIndex)}
-                      >
-                        <input 
-                          type="radio" 
-                          name={`question-${index}`} 
-                          id={`q${index}-opt${optIndex}`}
-                          checked={selectedAnswers[index] === optIndex}
-                          onChange={() => handleAnswerSelect(index, optIndex)}
-                        />
-                        <label htmlFor={`q${index}-opt${optIndex}`}>{option}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              <button className="submit-quiz-btn" onClick={handleSubmit} disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit'}
-              </button>
-            </div>
-          )}
-
-          {submitted && result && (
-            <div className="result-container">
-              <h2>Quiz Results</h2>
-              <div className="score-display">
-                <div className="score-circle">
-                  <span className="percentage">{result.percentage}%</span>
-                  <span className="score-text">{result.score} / {result.total}</span>
-                </div>
-              </div>
-              <p className="result-message">
-                {result.percentage >= 80 ? 'Excellent work!' : 
-                 result.percentage >= 60 ? 'Good job!' : 
-                 'Keep practicing!'}
-              </p>
-              <button onClick={() => {
-                setSubmitted(false);
-                setResult(null);
-                setQuiz(null);
-                setSelectedAnswers({});
-                setTopic('');
-              }} className="new-quiz-btn">
-                Create New Quiz
-              </button>
-            </div>
-          )}
         </div>
-      </div>
-    </>
+      ) : (
+        <div className="card" style={{textAlign: 'center'}}>
+          <h2 className="text-gradient" style={{fontSize: '2rem', marginBottom: '1rem'}}>Quiz Ready!</h2>
+          <p style={{color: 'var(--text-secondary)', marginBottom: '2rem'}}>
+            Your quiz on <strong>{quiz.topic}</strong> ({quiz.difficulty}) is ready to share.
+          </p>
+          
+          <div className="form-group">
+            <label className="form-label">Shareable Link</label>
+            <div style={{display: 'flex', gap: '0.5rem'}}>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={`${window.location.origin}/quiz/${quiz.shareableCode}`} 
+                readOnly 
+              />
+              <button onClick={copyShareableLink} className="btn-primary">Copy</button>
+            </div>
+          </div>
+
+          <div style={{display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'center'}}>
+            <button onClick={() => setQuiz(null)} className="btn-primary" style={{background: 'transparent', border: '1px solid var(--text-muted)'}}>
+              Create Another
+            </button>
+            <button onClick={() => navigate(`/quiz/${quiz.shareableCode}/results`)} className="btn-primary">
+              View Results
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
