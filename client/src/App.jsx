@@ -6,8 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import QuizGenerator from "./QuizGenerator";
 import QuizTaking from "./pages/QuizTaking";
 import QuizResults from "./pages/QuizResults";
-import AuthSuccess from "./pages/AuthSuccess"; // New page for OAuth redirect
-import "./App.css";
+import AuthSuccess from "./pages/AuthSuccess";
 
 const NavBar = () => {
   const { user, logout } = useAuth();
@@ -16,29 +15,47 @@ const NavBar = () => {
   if (["/login", "/register"].includes(location.pathname)) return null;
 
   return (
-    <nav className="navbar container">
-      <Link to="/" className="logo text-gradient">
-        Quantum Quiz
-      </Link>
-      <div className="nav-links">
-        {user ? (
-          <>
-            <Link to="/" className="nav-item">Dashboard</Link>
-            {user.role === "teacher" && (
-              <Link to="/create-quiz" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>
-                + Create
-              </Link>
+    <nav className="sticky top-0 z-50 w-full backdrop-blur-lg bg-background/80 border-b border-white/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              QuizWhiz
+            </span>
+          </Link>
+
+          {/* Navigation Links */}
+          <div className="flex items-center gap-6">
+            {user ? (
+              <>
+                <Link to="/" className="text-slate-300 hover:text-white transition-colors font-medium">
+                  Dashboard
+                </Link>
+                {user.role === "teacher" && (
+                  <Link to="/create-quiz" className="px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all font-medium">
+                    + Create Quiz
+                  </Link>
+                )}
+                <button 
+                  onClick={logout} 
+                  className="text-slate-400 hover:text-white font-medium"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-slate-300 hover:text-white font-medium">
+                  Login
+                </Link>
+                <Link to="/register" className="btn-primary">
+                  Get Started
+                </Link>
+              </>
             )}
-            <button onClick={logout} className="nav-item" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="nav-item">Login</Link>
-            <Link to="/register" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>Get Started</Link>
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </nav>
   );
@@ -47,9 +64,14 @@ const NavBar = () => {
 const ProtectedRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div className="container" style={{padding: '2rem'}}>Loading...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>
+  );
+  
   if (!user) return <Login />;
-  if (role && user.role !== role) return <div className="container">Access Denied</div>;
+  if (role && user.role !== role) return <div className="p-8 text-center text-red-400">Access Denied</div>;
 
   return children;
 };
@@ -58,9 +80,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="app-layout">
+        <div className="min-h-screen bg-background">
           <NavBar />
-          <div className="container" style={{ flex: 1, paddingBottom: '2rem' }}>
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -90,7 +112,7 @@ function App() {
                 </ProtectedRoute>
               } />
             </Routes>
-          </div>
+          </main>
         </div>
       </Router>
     </AuthProvider>

@@ -1,90 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Average+Sans&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
-:root {
-  /* Quantum Theme Colors */
-  --bg-dark: #0F172A; /* Deep Blue/Black */
-  --bg-card: rgba(30, 41, 59, 0.7); /* Glassy Blue */
-  --bg-card-hover: rgba(51, 65, 85, 0.8);
+@theme {
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-primary: #8b5cf6;
+  --color-secondary: #06b6d4;
   
-  --primary-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%); /* Purple to Cyan */
-  --secondary-gradient: linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%); /* Blue to Cyan */
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-white font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-secondary px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer;
+  }
   
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  
-  --border-color: rgba(148, 163, 184, 0.1);
-  --glow-primary: 0 0 20px rgba(139, 92, 246, 0.3);
-  
-  --font-main: 'Inter', sans-serif;
-}
+  .card {
+    @apply bg-surface/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl;
+  }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: var(--font-main);
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-dark);
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-/* Utilities */
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.text-gradient {
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.btn-primary {
-  background: var(--primary-gradient);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--glow-primary);
-}
-
-.card {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-color);
-  border-radius: 1rem;
-  padding: 1.5rem;
+  .input-field {
+    @apply w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors placeholder-slate-500;
+  }
 }

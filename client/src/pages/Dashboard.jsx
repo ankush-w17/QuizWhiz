@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import "../App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// Mock Data for "Explore" section in Student View (matching screenshot)
 const EXPLORE_TOPICS = [
   { title: "Artificial Intelligence", desc: "Discover the world of AI, machine learning and neural networks", difficulty: "Hard" },
   { title: "Quantum Physics", desc: "Explore the mysteries of quantum mechanics and particle physics", difficulty: "Hard" },
@@ -18,7 +16,7 @@ const EXPLORE_TOPICS = [
 
 function Dashboard() {
   const { user } = useAuth();
-  const [data, setData] = useState([]); // Stores quizzes (teacher) or submissions (student)
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -44,123 +42,146 @@ function Dashboard() {
     alert("Link copied!");
   };
 
-  const handleStartTopic = (topic) => {
-    // Redirect to generator with pre-filled topic (need to implement parsing in Generator or just pass state)
-    // For now, simpler to just navigation. In a real app we'd pass state.
-    // Actually, let's just use navigation state or query param. 
-    // Since I haven't implemented query param reading in Generator, I'll just redirect to create-quiz 
-    // but the user has to type it. 
-    // Wait, let's fix Generator to read query param later if needed. 
-    // For now, assume manual entry or update Generator later.
-    // Let's pass it via state location.
-    // I can't modify Generator right now without another tool call. 
-    // I entered "Quantum Physics" as example in Generator placeholder.
-    navigate('/create-quiz');
-  };
-
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1 className="page-title text-gradient">
-          {user.role === 'teacher' ? 'My Quizzes' : 'Quantum Quiz'}
-        </h1>
-        <p className="page-subtitle">
-          {user.role === 'teacher' 
-            ? 'Manage and track your generated quizzes' 
-            : 'Test your knowledge on the frontiers of science'}
-        </p>
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/10 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {user.role === 'teacher' ? 'My Quizzes' : 'Dashboard'}
+          </h1>
+          <p className="text-slate-400">
+            {user.role === 'teacher' 
+              ? 'Manage and track your generated quizzes' 
+              : 'Track your learning progress and explore new topics'}
+          </p>
+        </div>
+        {user.role === 'teacher' && (
+           <Link to="/create-quiz" className="btn-primary">
+             + New Quiz
+           </Link>
+        )}
       </div>
 
       {loading ? (
-        <div className="container">Loading...</div>
+        <div className="text-center py-20 text-slate-500">Loading your content...</div>
       ) : (
         <>
           {user.role === 'student' && (
-            <div style={{marginBottom: '4rem'}}>
-               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
-                 <h2 className="text-gradient">Explore Topics</h2>
-                 <Link to="/courses" className="btn-primary" style={{padding: '0.5rem 1rem', fontSize: '0.8rem'}}>All Courses</Link>
+            <section className="space-y-6">
+               <div className="flex justify-between items-center">
+                 <h2 className="text-xl font-semibold text-primary">Explore Topics</h2>
                </div>
                
-               <div className="quiz-grid">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {EXPLORE_TOPICS.map((topic, idx) => (
-                   <div key={idx} className="quiz-card">
-                     <div>
-                       <h3 className="quiz-title">{topic.title}</h3>
-                       <p className="quiz-description">{topic.desc}</p>
-                       <div className="quiz-meta">
-                         <span>20 questions</span>
-                         <span style={{color: '#8B5CF6'}}>{topic.difficulty} Details</span>
-                       </div>
-                       <div className="progress-bar-bg">
-                          <div className="progress-bar-fill" style={{width: '0%'}}></div>
-                       </div>
-                       <div className="quiz-meta">
-                         <span>⚡ 700 XP</span>
-                         <span>0% completed</span>
+                   <div key={idx} className="card hover:border-primary/50 transition-colors group flex flex-col h-full">
+                     <div className="flex-1">
+                       <h3 className="text-lg font-bold text-white mb-2 group-hover:text-primary transition-colors">{topic.title}</h3>
+                       <p className="text-sm text-slate-400 mb-4">{topic.desc}</p>
+                       <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-slate-500 mb-6">
+                         <span className="bg-slate-800 px-2 py-1 rounded">{topic.difficulty}</span>
+                         <span>20 Questions</span>
                        </div>
                      </div>
-                     <Link to="/create-quiz" className="btn-primary" style={{textAlign: 'center', marginTop: '1rem'}}>
-                       Start Quiz
+                     <Link to="/create-quiz" className="w-full block text-center py-2 rounded-lg bg-slate-800 hover:bg-primary hover:text-white transition-all text-slate-300 font-medium text-sm">
+                       Start Assessment
                      </Link>
                    </div>
                  ))}
                </div>
-            </div>
+            </section>
           )}
 
-          <h2 className="text-gradient" style={{marginBottom: '1.5rem'}}>
-            {user.role === 'teacher' ? 'Created Quizzes' : 'Your History'}
-          </h2>
-          
-          <div className="quiz-grid">
+          <section className="space-y-6">
+            <h2 className="text-xl font-semibold text-white">
+              {user.role === 'teacher' ? 'Recent Quizzes' : 'Your History'}
+            </h2>
+            
             {data.length === 0 ? (
-              <div className="card" style={{gridColumn: '1/-1', textAlign: 'center'}}>
-                <p style={{color: 'var(--text-secondary)'}}>No records found.</p>
+              <div className="card py-12 text-center">
+                <p className="text-slate-500 mb-4">No records found yet.</p>
+                {user.role === 'teacher' && (
+                   <Link to="/create-quiz" className="text-primary hover:underline">
+                     Create your first quiz &rarr;
+                   </Link>
+                )}
               </div>
-            ) : data.map((item) => (
-              <div key={item._id || item.submittedAt} className="quiz-card">
-                <div>
-                  <h3 className="quiz-title">{item.topic || item.quizTopic}</h3>
-                  <div className="quiz-meta">
-                    {user.role === 'teacher' ? (
-                      <span>Code: <span style={{color:'white', fontWeight:'bold'}}>{item.shareableCode}</span></span>
-                    ) : (
-                      <span>Score: {item.score}/{item.totalQuestions}</span>
-                    )}
-                    <span>{new Date(item.createdAt || item.submittedAt).toLocaleDateString()}</span>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {data.map((item) => (
+                  <div key={item._id || item.submittedAt} className="card hover:shadow-2xl transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-bold text-white truncate pr-2">
+                        {item.topic || item.quizTopic}
+                      </h3>
+                      {user.role === 'student' && (
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          item.percentage >= 80 ? 'bg-green-500/20 text-green-400' :
+                          item.percentage >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}>
+                          {item.percentage}%
+                        </span>
+                      )}
+                      {user.role === 'teacher' && (
+                         <span className="text-xs font-mono bg-slate-800 px-2 py-1 rounded text-slate-400">
+                           {item.shareableCode}
+                         </span>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 mb-6">
+                      <div className="flex justify-between text-sm text-slate-400">
+                        <span>Date</span>
+                        <span>{new Date(item.createdAt || item.submittedAt).toLocaleDateString()}</span>
+                      </div>
+                      {user.role === 'teacher' && (
+                        <div className="flex justify-between text-sm text-slate-400">
+                          <span>Submissions</span>
+                          <span className="text-white font-medium">{item.submissionCount}</span>
+                        </div>
+                      )}
+                      {user.role === 'student' && (
+                        <div className="flex justify-between text-sm text-slate-400">
+                          <span>Score</span>
+                          <span className="text-white font-medium">{item.score}/{item.totalQuestions}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {user.role === 'teacher' ? (
+                        <>
+                          <button 
+                            onClick={() => copyLink(item.shareableCode)} 
+                            className="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors"
+                          >
+                            Copy Code
+                          </button>
+                          <Link 
+                            to={`/quiz/${item.shareableCode}/results`} 
+                            className="px-3 py-2 rounded border border-primary/30 text-primary hover:bg-primary/10 text-center text-sm font-medium transition-colors"
+                          >
+                            Results
+                          </Link>
+                        </>
+                      ) : (
+                         <div className="col-span-2 relative h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                           <div 
+                             className={`absolute top-0 left-0 h-full rounded-full ${
+                               item.percentage >= 80 ? 'bg-green-500' :
+                               item.percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                             }`} 
+                             style={{width: `${item.percentage}%`}}
+                           ></div>
+                         </div>
+                      )}
+                    </div>
                   </div>
-                  {user.role === 'teacher' && (
-                     <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem'}}>
-                       {item.submissionCount} submissions
-                     </p>
-                  )}
-                  {user.role === 'student' && (
-                     <div className="progress-bar-bg">
-                        <div className="progress-bar-fill" style={{width: `${item.percentage}%`}}></div>
-                     </div>
-                  )}
-                </div>
-                
-                <div style={{display: 'flex', gap: '0.5rem', marginTop: '1rem'}}>
-                  {user.role === 'teacher' ? (
-                    <>
-                      <button onClick={() => copyLink(item.shareableCode)} className="btn-primary" style={{flex:1, fontSize: '0.8rem'}}>
-                        Copy Code
-                      </button>
-                      <Link to={`/quiz/${item.shareableCode}/results`} className="btn-primary" style={{flex:1, background: 'transparent', border: '1px solid var(--border-color)', fontSize: '0.8rem', textAlign:'center'}}>
-                        Results
-                      </Link>
-                    </>
-                  ) : (
-                     <span style={{color: item.percentage >= 80 ? '#4ade80' : '#facc15', fontWeight: 'bold'}}>
-                       {item.percentage}% {item.percentage >= 80 ? 'Excellent' : 'Good'}
-                     </span>
-                  )}
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </section>
         </>
       )}
     </div>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import "../App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -29,70 +28,73 @@ function QuizResults() {
     }
   };
 
-  if (loading) return <div className="container">Loading results...</div>;
-  if (error) return <div className="container" style={{color: '#ef4444'}}>{error}</div>;
+  if (loading) return <div className="text-center py-20 text-slate-500">Loading results...</div>;
+  if (error) return <div className="text-center py-20 text-red-500">{error}</div>;
 
   const averageScore = results.submissions.length > 0
     ? Math.round(results.submissions.reduce((sum, s) => sum + s.percentage, 0) / results.submissions.length)
     : 0;
 
   return (
-    <div className="container">
-      <Link to="/" style={{color: 'var(--text-secondary)', textDecoration: 'none', marginBottom: '1rem', display: 'inline-block'}}>&larr; Back to Dashboard</Link>
+    <div className="space-y-8">
+      <Link to="/" className="text-slate-400 hover:text-white transition-colors text-sm font-medium">
+        &larr; Back to Dashboard
+      </Link>
       
-      <div className="dashboard-header">
-        <h1 className="page-title text-gradient">Results: {results.topic}</h1>
-        <p className="page-subtitle">Difficulty: {results.difficulty || 'Medium'}</p>
-      </div>
-
-      <div className="quiz-grid" style={{marginBottom: '2rem'}}>
-        <div className="card" style={{textAlign: 'center'}}>
-           <h3 style={{color: 'var(--text-secondary)', fontSize: '0.9rem'}}>Submissions</h3>
-           <p style={{fontSize: '2.5rem', fontWeight: 'bold', color: '#8B5CF6'}}>{results.submissions.length}</p>
-        </div>
-        <div className="card" style={{textAlign: 'center'}}>
-           <h3 style={{color: 'var(--text-secondary)', fontSize: '0.9rem'}}>Avg. Score</h3>
-           <p style={{fontSize: '2.5rem', fontWeight: 'bold', color: '#06B6D4'}}>{averageScore}%</p>
-        </div>
-        <div className="card" style={{textAlign: 'center'}}>
-           <h3 style={{color: 'var(--text-secondary)', fontSize: '0.9rem'}}>Total Questions</h3>
-           <p style={{fontSize: '2.5rem', fontWeight: 'bold'}}>{results.totalQuestions}</p>
+      <div className="flex justify-between items-end border-b border-white/10 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Results: {results.topic}</h1>
+          <p className="text-slate-400">Difficulty: {results.difficulty || 'Medium'}</p>
         </div>
       </div>
 
-      <div className="card">
-        <h3 style={{marginBottom: '1.5rem'}}>Student Submissions</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="card text-center p-6">
+           <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Total Submissions</h3>
+           <p className="text-4xl font-bold text-primary">{results.submissions.length}</p>
+        </div>
+        <div className="card text-center p-6">
+           <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Avg. Score</h3>
+           <p className="text-4xl font-bold text-secondary">{averageScore}%</p>
+        </div>
+        <div className="card text-center p-6">
+           <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Questions</h3>
+           <p className="text-4xl font-bold text-white">{results.totalQuestions}</p>
+        </div>
+      </div>
+
+      <div className="card overflow-hidden">
+        <div className="p-6 border-b border-white/5">
+           <h3 className="text-lg font-bold text-white">Student Submissions</h3>
+        </div>
         
         {results.submissions.length === 0 ? (
-          <p style={{color: 'var(--text-secondary)', textAlign: 'center'}}>No submissions yet.</p>
+          <div className="p-12 text-center text-slate-500">No submissions yet.</div>
         ) : (
-          <div style={{overflowX: 'auto'}}>
-            <table style={{width: '100%', borderCollapse: 'collapse', textAlign: 'left'}}>
-              <thead>
-                <tr style={{borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)'}}>
-                  <th style={{padding: '1rem'}}>Name</th>
-                  <th style={{padding: '1rem'}}>Score</th>
-                  <th style={{padding: '1rem'}}>Status</th>
-                  <th style={{padding: '1rem'}}>Date</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-slate-900/50 text-slate-400 text-sm">
+                <tr>
+                  <th className="p-4 font-medium">Name</th>
+                  <th className="p-4 font-medium">Score</th>
+                  <th className="p-4 font-medium">Status</th>
+                  <th className="p-4 font-medium">Date</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5">
                 {results.submissions.map((sub, idx) => (
-                  <tr key={idx} style={{borderBottom: '1px solid rgba(148, 163, 184, 0.05)'}}>
-                    <td style={{padding: '1rem'}}>{sub.studentName}</td>
-                    <td style={{padding: '1rem'}}>{sub.score} / {results.totalQuestions}</td>
-                    <td style={{padding: '1rem'}}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem', 
-                        borderRadius: '1rem', 
-                        fontSize: '0.8rem',
-                        background: sub.percentage >= 80 ? 'rgba(74, 222, 128, 0.2)' : sub.percentage >= 60 ? 'rgba(250, 204, 21, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                        color: sub.percentage >= 80 ? '#4ade80' : sub.percentage >= 60 ? '#facc15' : '#ef4444'
-                      }}>
+                  <tr key={idx} className="hover:bg-white/5 transition-colors text-sm">
+                    <td className="p-4 text-white font-medium">{sub.studentName}</td>
+                    <td className="p-4 text-slate-300">{sub.score} / {results.totalQuestions}</td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        sub.percentage >= 80 ? 'bg-green-500/20 text-green-400' : 
+                        sub.percentage >= 60 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+                      }`}>
                         {sub.percentage}%
                       </span>
                     </td>
-                    <td style={{padding: '1rem', color: 'var(--text-muted)'}}>
+                    <td className="p-4 text-slate-500">
                       {new Date(sub.submittedAt).toLocaleDateString()}
                     </td>
                   </tr>

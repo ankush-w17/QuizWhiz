@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -51,31 +50,39 @@ function QuizGenerator() {
   };
 
   return (
-    <div className="generator-container">
-      <h1 className="page-title text-gradient">Create New Quiz</h1>
-      <p className="page-subtitle" style={{marginBottom: '2rem'}}>Use AI to generate a custom quiz in seconds.</p>
+    <div className="max-w-2xl mx-auto space-y-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Create New Quiz
+        </h1>
+        <p className="text-slate-400">Power your assessments with AI</p>
+      </div>
       
-      {error && <div className="card" style={{borderColor: '#ef4444', color: '#ef4444', marginBottom: '1rem'}}>{error}</div>}
+      {error && (
+        <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-center">
+          {error}
+        </div>
+      )}
       
       {!quiz ? (
         <div className="card">
-          <form onSubmit={generateQuiz}>
-            <div className="form-group">
-              <label className="form-label">Topic</label>
+          <form onSubmit={generateQuiz} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Quiz Topic</label>
               <input
                 type="text"
-                className="form-input"
+                className="input-field"
                 placeholder="e.g., Quantum Physics, Ancient Rome, Python Basics"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
               />
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">Difficulty</label>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Difficulty</label>
                 <select 
-                  className="form-input" 
+                  className="input-field cursor-pointer" 
                   value={difficulty} 
                   onChange={(e) => setDifficulty(e.target.value)}
                 >
@@ -85,11 +92,11 @@ function QuizGenerator() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Questions</label>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Questions</label>
                 <input
                   type="number"
-                  className="form-input"
+                  className="input-field"
                   min="1"
                   max="20"
                   value={numQuestions}
@@ -98,43 +105,47 @@ function QuizGenerator() {
               </div>
             </div>
 
-            <button type="submit" className="btn-primary" style={{width: '100%'}} disabled={loading}>
+            <button type="submit" className="btn-primary w-full py-4 text-lg" disabled={loading}>
               {loading ? (
-                 <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}>
-                   <span className="spinner"></span> Generating...
+                 <span className="flex items-center justify-center gap-2">
+                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                   Generating...
                  </span>
               ) : 'Generate Quiz'}
             </button>
           </form>
         </div>
       ) : (
-        <div className="card" style={{textAlign: 'center'}}>
-          <h2 className="text-gradient" style={{fontSize: '2rem', marginBottom: '1rem'}}>Quiz Ready!</h2>
-          <p style={{color: 'var(--text-secondary)', marginBottom: '2rem'}}>
-            Your quiz on <strong>{quiz.topic}</strong> ({quiz.difficulty}) is ready to share.
-          </p>
+        <div className="card text-center space-y-8 py-10">
+          <div className="space-y-2">
+             <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+               ✓
+             </div>
+             <h2 className="text-2xl font-bold text-white">Quiz Generated Successfully!</h2>
+             <p className="text-slate-400">
+               Your quiz on <span className="text-primary font-medium">{quiz.topic}</span> is ready.
+             </p>
+          </div>
           
-          <div className="form-group">
-            <label className="form-label">Shareable Link</label>
-            <div style={{display: 'flex', gap: '0.5rem'}}>
-              <input 
-                type="text" 
-                className="form-input" 
-                value={`${window.location.origin}/quiz/${quiz.shareableCode}`} 
-                readOnly 
-              />
-              <button onClick={copyShareableLink} className="btn-primary">Copy</button>
+          <div className="bg-slate-900/50 p-6 rounded-xl border border-white/5 space-y-4 max-w-sm mx-auto">
+            <p className="text-sm text-slate-500 uppercase tracking-widest font-semibold">Shareable Code</p>
+            <div className="text-4xl font-mono font-bold tracking-wider text-white select-all">
+              {quiz.shareableCode}
             </div>
           </div>
 
-          <div style={{display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'center'}}>
-            <button onClick={() => setQuiz(null)} className="btn-primary" style={{background: 'transparent', border: '1px solid var(--text-muted)'}}>
-              Create Another
+          <div className="flex justify-center gap-4">
+            <button onClick={copyShareableLink} className="btn-primary">
+              Copy Link
             </button>
-            <button onClick={() => navigate(`/quiz/${quiz.shareableCode}/results`)} className="btn-primary">
+            <button onClick={() => navigate(`/quiz/${quiz.shareableCode}/results`)} className="px-6 py-2 rounded-lg border border-white/20 hover:bg-white/5 transition-colors text-white font-medium">
               View Results
             </button>
           </div>
+          
+          <button onClick={() => setQuiz(null)} className="text-slate-500 hover:text-slate-300 text-sm mt-4 block mx-auto transition-colors">
+            Generate Another
+          </button>
         </div>
       )}
     </div>

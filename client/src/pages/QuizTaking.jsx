@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import "../App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -69,69 +68,83 @@ function QuizTaking() {
     }
   };
 
-  if (loading) return <div className="container">Loading quiz...</div>;
+  if (loading) return <div className="text-center py-20 text-slate-500">Loading quiz...</div>;
   if (error) return (
-    <div className="container" style={{marginTop: '2rem'}}>
-      <div className="card" style={{borderColor: '#ef4444', color: '#ef4444', textAlign: 'center'}}>
-        <h2>{error}</h2>
-        <Link to="/" className="btn-primary" style={{display: 'inline-block', marginTop: '1rem', textDecoration: 'none'}}>Back to Dashboard</Link>
+    <div className="max-w-md mx-auto mt-20 text-center space-y-4">
+      <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-6 rounded-xl">
+        <h2 className="text-xl font-bold mb-2">Error</h2>
+        <p>{error}</p>
       </div>
+      <Link to="/" className="inline-block text-slate-400 hover:text-white transition-colors">
+        &larr; Back to Dashboard
+      </Link>
     </div>
   );
 
   if (submitted && result) {
     return (
-      <div className="container" style={{maxWidth: '600px', marginTop: '3rem'}}>
-        <div className="card" style={{textAlign: 'center', padding: '3rem 2rem'}}>
-          <h2 className="text-gradient" style={{fontSize: '2rem', marginBottom: '2rem'}}>Quiz Completed!</h2>
+      <div className="max-w-lg mx-auto mt-10">
+        <div className="card text-center p-10 space-y-8">
+          <h2 className="text-3xl font-bold text-white">Quiz Completed!</h2>
           
-          <div style={{position: 'relative', width: '150px', height: '150px', margin: '0 auto 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'conic-gradient(var(--secondary-gradient), var(--bg-card))', boxShadow: 'var(--glow-primary)'}}>
-             <div style={{position: 'absolute', width: '140px', height: '140px', background: 'var(--bg-dark)', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-                <span style={{fontSize: '2.5rem', fontWeight: 'bold'}}>{result.percentage}%</span>
-                <span style={{color: 'var(--text-secondary)'}}>{result.score} / {result.total}</span>
+          <div className="relative w-40 h-40 mx-auto flex items-center justify-center rounded-full bg-slate-900 border-4 border-primary shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+             <div className="flex flex-col">
+                <span className="text-4xl font-bold text-white">{result.percentage}%</span>
+                <span className="text-slate-400 text-sm">{result.score} / {result.total} Correct</span>
              </div>
           </div>
           
-          <div style={{marginBottom: '2rem'}}>
-            <p style={{fontSize: '1.2rem', color: result.percentage >= 80 ? '#4ade80' : 'var(--text-primary)'}}>
+          <div className="space-y-2">
+            <p className={`text-xl font-medium ${result.percentage >= 80 ? 'text-green-400' : 'text-slate-300'}`}>
               {result.percentage >= 80 ? "Excellent work! 🌟" : result.percentage >= 60 ? "Good job! 👍" : "Keep practicing! 💪"}
             </p>
-            {result.xpEarned && <p style={{color: '#8B5CF6', fontWeight: 'bold', marginTop: '0.5rem'}}>+{result.xpEarned} XP Earned</p>}
+            {result.xpEarned && <p className="text-primary font-bold">+{result.xpEarned} XP Earned</p>}
           </div>
 
-          <Link to="/" className="btn-primary" style={{textDecoration: 'none'}}>Back to Dashboard</Link>
+          <Link to="/" className="btn-primary block w-full">
+            Back to Dashboard
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <div className="dashboard-header">
-        <h1 className="page-title text-gradient">{quiz.topic}</h1>
-        <p className="page-subtitle">Difficulty: {quiz.difficulty || 'Medium'}</p>
+    <div className="max-w-3xl mx-auto space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-white">{quiz.topic}</h1>
+        <div className="flex gap-4 text-sm text-slate-400">
+          <span className="bg-slate-800 px-2 py-0.5 rounded uppercase text-xs font-bold tracking-wider">
+            {quiz.difficulty || 'Medium'}
+          </span>
+          <span>{quiz.questions.length} Questions</span>
+        </div>
       </div>
 
-      <div className="question-card">
+      <div className="space-y-6">
         {quiz.questions.map((q, index) => (
-          <div key={index} className="card" style={{marginBottom: '2rem'}}>
-            <h3 style={{marginBottom: '1rem'}}>Question {index + 1}</h3>
-            <p style={{fontSize: '1.1rem', marginBottom: '1.5rem'}}>{q.question}</p>
+          <div key={index} className="card p-6 md:p-8">
+            <h3 className="text-lg font-medium text-white mb-6 flex gap-3">
+              <span className="text-slate-500 font-bold">0{index + 1}</span>
+              {q.question}
+            </h3>
             
-            <div className="options">
+            <div className="grid grid-cols-1 gap-3">
               {q.options.map((option, optIndex) => (
                 <button
                   key={optIndex}
-                  className={`option-btn ${selectedAnswers[index] === optIndex ? "selected" : ""}`}
+                  className={`w-full text-left p-4 rounded-lg border transition-all duration-200 flex items-center gap-4 group ${
+                    selectedAnswers[index] === optIndex 
+                      ? "bg-primary/20 border-primary text-white" 
+                      : "bg-slate-900/50 border-white/5 text-slate-300 hover:bg-slate-800 hover:border-white/10"
+                  }`}
                   onClick={() => handleAnswerSelect(index, optIndex)}
                 >
-                  <span style={{
-                    display: 'inline-block', width: '24px', height: '24px', 
-                    border: '1px solid var(--border-color)', borderRadius: '50%', 
-                    marginRight: '10px', textAlign: 'center', lineHeight: '22px', fontSize: '0.8rem',
-                    background: selectedAnswers[index] === optIndex ? '#06B6D4' : 'transparent',
-                    borderColor: selectedAnswers[index] === optIndex ? '#06B6D4' : 'var(--border-color)'
-                  }}>
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border transition-colors ${
+                    selectedAnswers[index] === optIndex
+                      ? "bg-primary border-primary text-white"
+                      : "bg-transparent border-slate-600 text-slate-500 group-hover:border-slate-400 group-hover:text-slate-300"
+                  }`}>
                     {String.fromCharCode(65 + optIndex)}
                   </span>
                   {option}
@@ -140,8 +153,10 @@ function QuizTaking() {
             </div>
           </div>
         ))}
+      </div>
 
-        <button className="btn-primary" onClick={handleSubmit} style={{width: '100%', marginBottom: '3rem'}}>
+      <div className="sticky bottom-4">
+        <button className="btn-primary w-full py-4 text-lg shadow-2xl" onClick={handleSubmit}>
           Submit Assessment
         </button>
       </div>
