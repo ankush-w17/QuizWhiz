@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -48,7 +49,7 @@ function QuizTaking() {
 
     for (let i = 0; i < quiz.questions.length; i++) {
       if (selectedAnswers[i] === undefined) {
-        alert(`Please answer question ${i + 1}`);
+        toast.error(`Please answer question ${i + 1}`);
         return;
       }
       answersArray.push(letters[selectedAnswers[i]]);
@@ -62,9 +63,10 @@ function QuizTaking() {
       );
       setResult(response.data);
       setSubmitted(true);
+      toast.success("Quiz submitted successfully!");
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to submit quiz");
+      toast.error("Failed to submit quiz");
     }
   };
 

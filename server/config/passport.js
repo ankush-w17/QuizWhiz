@@ -34,8 +34,7 @@ passport.use(
           googleId: profile.id,
           name: profile.displayName,
           email: email,
-          role: 'student', // Default role for Google Login
-          password: '' // No password for OAuth users
+          role: 'student' // Default role for Google Login
         });
 
         await user.save();

@@ -1,18 +1,27 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function Login() {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('teacher');
+  const [role, setRole] = useState(searchParams.get('role') || 'teacher');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam && (roleParam === 'teacher' || roleParam === 'student')) {
+      setRole(roleParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +30,7 @@ function Login() {
 
     try {
       await login(email, password, role);
+      toast.success('Welcome back!');
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
@@ -132,7 +142,7 @@ function Login() {
 
         <p className="text-center text-slate-400 text-sm">
           Don't have an account?{' '}
-          <Link to="/register" className="text-primary hover:text-primary/80 font-medium transition-colors">
+          <Link to={`/register?role=${role}`} className="text-primary hover:text-primary/80 font-medium transition-colors">
             Register for free
           </Link>
         </p>

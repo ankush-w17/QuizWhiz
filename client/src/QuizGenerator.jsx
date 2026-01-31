@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -35,9 +36,11 @@ function QuizGenerator() {
       });
       
       setQuiz(response.data);
+      toast.success('Quiz generated successfully!');
     } catch (error) {
       console.error('Error:', error);
       setError(error.response?.data?.error || 'Failed to generate quiz');
+      toast.error('Failed to generate quiz');
     } finally {
       setLoading(false);
     }
@@ -46,7 +49,7 @@ function QuizGenerator() {
   const copyShareableLink = () => {
     const link = `${window.location.origin}/quiz/${quiz.shareableCode}`;
     navigator.clipboard.writeText(link);
-    alert('Link copied to clipboard!');
+    toast.success('Link copied to clipboard!');
   };
 
   return (

@@ -1,19 +1,28 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function Register() {
+  const [searchParams] = useSearchParams();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('teacher');
+  const [role, setRole] = useState(searchParams.get('role') || 'teacher');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam && (roleParam === 'teacher' || roleParam === 'student')) {
+      setRole(roleParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +37,7 @@ function Register() {
 
     try {
       await register(name, email, password, role);
+      toast.success('Account created successfully!');
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
@@ -151,7 +161,7 @@ function Register() {
 
         <p className="text-center text-slate-400 text-sm">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary hover:text-primary/80 font-medium transition-colors">
+          <Link to={`/login?role=${role}`} className="text-primary hover:text-primary/80 font-medium transition-colors">
             Sign In
           </Link>
         </p>

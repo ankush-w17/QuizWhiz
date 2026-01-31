@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import toast from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -12,12 +13,16 @@ const EXPLORE_TOPICS = [
   { title: "Cybersecurity", desc: "Test your knowledge about digital security and hacking prevention", difficulty: "Hard" },
   { title: "Future Tech", desc: "Test your knowledge on emerging technologies and innovations", difficulty: "Medium" },
   { title: "Robotics", desc: "Learn about the fascinating world of robots and automation", difficulty: "Medium" },
+  { title: "World History", desc: "Test your knowledge of ancient civilizations and modern events", difficulty: "Medium" },
+  { title: "Geography", desc: "Explore the world's continents, countries, and cultures", difficulty: "Easy" },
+  { title: "Literature", desc: "Dive into classic novels, poems, and famous authors", difficulty: "Hard" },
 ];
 
 function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,6 +36,7 @@ function Dashboard() {
       setData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -39,7 +45,31 @@ function Dashboard() {
   const copyLink = (code) => {
     const link = `${window.location.origin}/quiz/${code}`;
     navigator.clipboard.writeText(link);
-    alert("Link copied!");
+    toast.success("Link copied!");
+  };
+
+  const handleExplore = async (topic, difficulty) => {
+    if (generating) return;
+    setGenerating(true);
+    const toastId = toast.loading(`Generating ${topic} quiz...`);
+    
+    try {
+      const response = await axios.post(`${API_URL}/api/generate-quiz`, {
+        topic: topic,
+        numQuestions: 5,
+        difficulty: difficulty.toLowerCase()
+      }, {
+        withCredentials: true
+      });
+      
+      toast.success("Quiz generated!", { id: toastId });
+      navigate(`/quiz/${response.data.shareableCode}`);
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      toast.error(error.response?.data?.error || "Failed to generate quiz", { id: toastId });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -80,12 +110,16 @@ function Dashboard() {
                        <p className="text-sm text-slate-400 mb-4">{topic.desc}</p>
                        <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-slate-500 mb-6">
                          <span className="bg-slate-800 px-2 py-1 rounded">{topic.difficulty}</span>
-                         <span>20 Questions</span>
+                         <span>5 Questions</span>
                        </div>
                      </div>
-                     <Link to="/create-quiz" className="w-full block text-center py-2 rounded-lg bg-slate-800 hover:bg-primary hover:text-white transition-all text-slate-300 font-medium text-sm">
-                       Start Assessment
-                     </Link>
+                     <button 
+                       onClick={() => handleExplore(topic.title, topic.difficulty)}
+                       disabled={generating}
+                       className="w-full block text-center py-2 rounded-lg bg-slate-800 hover:bg-primary hover:text-white transition-all text-slate-300 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                       {generating ? 'Generating...' : 'Start Assessment'}
+                     </button>
                    </div>
                  ))}
                </div>
